@@ -187,7 +187,7 @@ router.get("/register", (req, res) => {
 
 function auth(req, res, next) {
   if (req.session?.user) return next();
-  res.redirect("/");
+ else res.redirect("/");
 }
 
 router.get("/profile", auth, (req, res) => {
