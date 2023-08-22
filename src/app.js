@@ -4,8 +4,8 @@ import {Server} from 'socket.io'
 import mongoose from "mongoose";
 import productsRouter from './routes/products.router.js'
 import cartRouter from './routes/cart.router.js'
-
-
+import initializePassport from "./config/passport.config.js";
+import passport from "passport";
 import productModel from "./Dao/models/Product.models.js";
 import messagesModel from "./Dao/models/messages.models.js";
 import session from "express-session"
@@ -50,6 +50,12 @@ app.use(
     saveUninitialized: true,
   })
 );
+
+//Passport
+initializePassport()
+app.use(passport.initialize())
+app.use(passport.session())
+
 
 //Rutas
 app.use('/', viewsRouter)

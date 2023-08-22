@@ -1,55 +1,47 @@
 import { Router } from "express";
+import passport from "passport";
 import UserModel from "../Dao/models/user.model.js"
 import { createHash, isValidPassword } from "../utils.js";
 
 const router = Router();
 
-router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  const user = await UserModel.findOne({email});
+router.post("/login",passport.authenticate("login", "/login"),async (req, res) => {
+   
+    if (!req.user) return res.status(400).send("Invalid Credentials");
+
+    req.session.user = req.user;
+    return res.redirect("/profile");
+  });
 
 
-  if (!user) {
-    console.log("No se encontro el user");
-    return res.redirect("/login");
-  } 
+router.post("/register",passport.authenticate("register", { failureRedirect: "/register" }),async (req, res) => {
+    // try {
+      const user = req.body;
+      // const email = user.email;
+    //   user.password = createHash(user.password); //Hasheamos el password
+      // const userRol = await UserModel.findOne({ email }).lean().exec();
 
-  if (!isValidPassword(user, password)) {
-    //Se valida el hash
-    console.log("Password not valid");
-    return res.redirect("/login");
-  }
-
-  req.session.user = user;
-  return res.redirect("/profile");
-});
-
-router.post("/register", async (req, res) => {
-  try{
-    const user = req.body;
-    const email = user.email
-    user.password = createHash(user.password); //Hasheamos el password
-    const userRol = await UserModel.findOne({email}).lean().exec();
-
-    if (!userRol) {
-      if (
-        user.email === "adminCoder@coder.com" &&
-        user.password === "adminCod3r123"
-      ) {
-        user.rol = "admin";
-      } else {
-        user.rol = "usuario";
-      }
-     const result= await UserModel.create(user);
-     console.log(result)
-      return res.redirect("/");
-    } else {
-      res.send("El usuario ya existe, favor de agregar otro");
-    }
-  }catch(e){
-  console.log(e)
-}
-});
+      // if (!userRol) {
+        if (
+          user.email === "adminCoder@coder.com" &&
+          user.password === "adminCod3r123"
+        ) {
+          user.rol = "admin";
+        } else {
+          user.rol = "usuario";
+        }
+        // const result = await UserModel.create(user);
+        // console.log(result);
+        res.redirect("/");
+      // }
+      // } else {
+      //   res.send("El usuario ya existe, favor de agregar otro");
+      // }
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+   }
+);
 
 router.get("/logout", (req, res) => {
   req.session.destroy((err) => {
