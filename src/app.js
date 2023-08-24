@@ -33,35 +33,6 @@ app.set('views', __dirname + '/views' )
 app.set('view engine', 'handlebars')
 
 
-//Configurar  Mongo Session
-app.use(
-  session({
-    store: MongoStore.create({
-      mongoUrl: uri,
-      dbName,
-      mongoOptions: {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      },
-      ttl: 100,
-    }),
-    secret: "secret",
-    resave: true,
-    saveUninitialized: true,
-  })
-);
-
-//Passport
-initializePassport()
-app.use(passport.initialize())
-app.use(passport.session())
-
-
-//Rutas
-app.use('/', viewsRouter)
-app.use('/api/products',productsRouter)
-app.use('/api/carts',cartRouter)
-app.use("/api/session", sessionRouter);
 
 
  
@@ -108,6 +79,35 @@ socket.on("message", async data => {
 })
   .catch(e=> console.log("Can't connected to DB"))
 
+//Configurar  Mongo Session
+app.use(
+  session({
+    store: MongoStore.create({
+      mongoUrl: uri,
+      dbName,
+      mongoOptions: {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      },
+      ttl: 100,
+    }),
+    secret: "secret",
+    resave: true,
+    saveUninitialized: true,
+  })
+);
+
+//Passport
+initializePassport()
+app.use(passport.initialize())
+app.use(passport.session())
+
+
+//Rutas
+app.use('/', viewsRouter)
+app.use('/api/products',productsRouter)
+app.use('/api/carts',cartRouter)
+app.use("/api/session", sessionRouter);
 
   
 

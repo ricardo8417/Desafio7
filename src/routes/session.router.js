@@ -15,13 +15,9 @@ router.post("/login",passport.authenticate("login", "/login"),async (req, res) =
 
 
 router.post("/register",passport.authenticate("register", { failureRedirect: "/register" }),async (req, res) => {
-    // try {
+    
       const user = req.body;
-      // const email = user.email;
-    //   user.password = createHash(user.password); //Hasheamos el password
-      // const userRol = await UserModel.findOne({ email }).lean().exec();
-
-      // if (!userRol) {
+    
         if (
           user.email === "adminCoder@coder.com" &&
           user.password === "adminCod3r123"
@@ -30,16 +26,9 @@ router.post("/register",passport.authenticate("register", { failureRedirect: "/r
         } else {
           user.rol = "usuario";
         }
-        // const result = await UserModel.create(user);
-        // console.log(result);
+        
         res.redirect("/");
-      // }
-      // } else {
-      //   res.send("El usuario ya existe, favor de agregar otro");
-      // }
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
+    
    }
 );
 
@@ -51,5 +40,24 @@ router.get("/logout", (req, res) => {
     res.redirect("/");
   });
 });
+
+
+//GITHUB
+router.get(
+  "/login-github",
+  passport.authenticate("github", { scope: ["user:email"] }),
+  async (req, res) => {}
+);
+
+router.get(
+  "/githubcallback",
+  passport.authenticate("github", { failureRedirect: "/" }),
+  async (req, res) => {
+    console.log("Callback: ", req.user);
+    req.session.user = req.user;
+    console.log(req.session);
+    res.redirect("/profile");
+  }
+);
 
 export default router;
