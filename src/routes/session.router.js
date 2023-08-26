@@ -1,7 +1,6 @@
 import { Router } from "express";
 import passport from "passport";
-import UserModel from "../Dao/models/user.model.js"
-import { createHash, isValidPassword } from "../utils.js";
+
 
 const router = Router();
 
@@ -42,22 +41,6 @@ router.get("/logout", (req, res) => {
 });
 
 
-//GITHUB
-router.get(
-  "/login-github",
-  passport.authenticate("github", { scope: ["user:email"] }),
-  async (req, res) => {}
-);
 
-router.get(
-  "/githubcallback",
-  passport.authenticate("github", { failureRedirect: "/" }),
-  async (req, res) => {
-    console.log("Callback: ", req.user);
-    req.session.user = req.user;
-    console.log(req.session);
-    res.redirect("/profile");
-  }
-);
 
 export default router;

@@ -3,6 +3,7 @@ import { Router } from "express";
 import productModel from "../Dao/models/Product.models.js";
 import messageModel from "../Dao/models/messages.models.js";
 import cartModel from "../Dao/models/Cart.models.js";
+import passport from "passport";
 const router = Router();
 // const productos = new ProductManager("./dataBase/productos.json");
 
@@ -169,32 +170,74 @@ router.get("/cart/count", async (req, res) => {
 
 //Rutas de renderizado de Sessions
 
+function auth(req, res, next) {
+  if (req.session?.user) return next();
+  else res.redirect("/");
+}
+//login
 router.get("/", (req, res) => {
-  if (req.session?.user) {
-    res.redirect("/profile");
-  }
+  if (req.session?.user) return res.redirect("/profile");
 
   res.render("login", {});
 });
-
-router.get("/register", (req, res) => {
-  if (req.session?.user) {
-    res.redirect("/profile");
-  }
-
-  res.render("register", {});
+//Logout
+router.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (!err) return res.redirect("/");
+    res.send({ status: "logoutError", body: err });
+  });
 });
 
-function auth(req, res, next) {
-  if (req.session?.user) return next();
- else res.redirect("/");
-}
+//Register
+router.get("/failregister", async (req, res) => {
+  res.send({ error: "failed" });
+});
 
+router.get("/register", (req, res) => {
+  if (req.session?.user) return res.redirect("/profile");
+    res.render("register", {});
+});
+//Profile
 router.get("/profile", auth, (req, res) => {
   const user = req.session.user;
 
   res.render("profile", user);
 });
 
+//GITHUB
+router.get(
+  "/login-github",
+  passport.authenticate("github", { scope: ["user:email"] }),
+  async (req, res) => {}
+);
+
+router.get(
+  "/githubcallback",
+  passport.authenticate("github", { failureRedirect: "/" }),
+  async (req, res) => {
+    console.log("Callback: ", req.user);
+    req.session.user = req.user;
+    console.log(req.session);
+    res.redirect("/profile");
+  }
+);
+
+router.post(
+  "/login",
+  passport.authenticate("login", "/login"),
+  async (req, res) => {
+    if (!req.user) return res.status(400).send("Invalid Credentials");
+    req.session.user = req.user;
+
+    return res.redirect("/profile");
+  }
+);
+router.post(
+  "/register",
+  passport.authenticate("register", { failureRedirect: "/register" }),
+  async (req, res) => {
+    res.redirect("/login");
+  }
+);
 
 export default router;
